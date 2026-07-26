@@ -1,11 +1,322 @@
 @import "tailwindcss";
 
+@import "@fontsource/nunito/latin-400.css";
+@import "@fontsource/nunito/latin-600.css";
+@import "@fontsource/nunito/latin-700.css";
+@import "@fontsource/nunito/latin-800.css";
+
+/* KSP suite design tokens — shared with Hub and Money Planner. Dark-only by design. */
+:root {
+  --bg: #12151c;
+  --surface: #1c212b;
+  --surface-2: #242c3a;
+  --surface-3: #2c3444;
+  --border: #333b4c;
+  --text: #f5f6f8;
+  --muted: #8b93a5;
+  --primary: #e5484d;
+  --primary-hover: #cc3f44;
+  --positive: #4ade80;
+  --negative: #f87171;
+  --focus: #6366f1;
+  --radius: 14px;
+
+  color-scheme: dark;
+}
+
+* {
+  box-sizing: border-box;
+}
+
 html,
 body,
 #root {
+  margin: 0;
   height: 100%;
 }
 
 body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Nunito', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  line-height: 1.5;
+}
+
+h1,
+h2,
+h3 {
+  font-weight: 800;
   margin: 0;
+}
+
+::selection {
+  background: rgba(229, 72, 77, 0.35);
+}
+
+:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+/* ---------- Shared KSP components ---------- */
+
+.stack {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1.25rem;
+}
+.card h2 {
+  margin: 0 0 0.85rem;
+  font-size: 1.05rem;
+}
+
+.muted {
+  color: var(--muted);
+}
+.hint {
+  font-size: 0.8rem;
+  margin: 0.6rem 0 0;
+}
+.positive {
+  color: var(--positive);
+}
+.negative {
+  color: var(--negative);
+}
+
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  font-size: 0.9rem;
+}
+
+input,
+select,
+textarea {
+  width: 100%;
+  padding: 0.7rem 0.85rem;
+  font-size: 1rem;
+  font-family: inherit;
+  color: var(--text);
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  outline: none;
+}
+input:focus,
+select:focus,
+textarea:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.25);
+}
+input[type='color'] {
+  padding: 0.25rem;
+  height: 2.5rem;
+  width: 3rem;
+}
+input[type='checkbox'] {
+  width: auto;
+}
+
+.btn {
+  padding: 0.7rem 1.1rem;
+  font-size: 1rem;
+  font-weight: 600;
+  font-family: inherit;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  cursor: pointer;
+  background: var(--surface-2);
+  color: var(--text);
+  transition:
+    background 0.15s ease,
+    opacity 0.15s ease;
+}
+.btn:hover:not(:disabled) {
+  background: var(--surface-3);
+}
+.btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+.btn.primary {
+  background: var(--primary);
+  color: white;
+}
+.btn.primary:hover:not(:disabled) {
+  background: var(--primary-hover);
+}
+.btn.small {
+  padding: 0.45rem 0.8rem;
+  font-size: 0.85rem;
+}
+.btn.link {
+  background: none;
+  border: none;
+  color: var(--primary);
+  padding: 0.3rem;
+}
+.btn.link:hover:not(:disabled) {
+  background: none;
+  text-decoration: underline;
+}
+.btn.danger {
+  background: rgba(248, 113, 113, 0.12);
+  color: var(--negative);
+  border: 1px solid rgba(248, 113, 113, 0.3);
+}
+.btn.danger:hover:not(:disabled) {
+  background: rgba(248, 113, 113, 0.22);
+}
+
+.badge {
+  display: inline-block;
+  margin-left: 0.5rem;
+  padding: 0.1rem 0.5rem;
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--muted);
+  background: var(--surface-2);
+  border-radius: 999px;
+  vertical-align: middle;
+}
+.badge.success {
+  color: var(--positive);
+  background: rgba(74, 222, 128, 0.12);
+}
+
+.alert {
+  margin: 0;
+  padding: 0.65rem 0.8rem;
+  border-radius: 10px;
+  font-size: 0.9rem;
+}
+.alert.error {
+  background: rgba(248, 113, 113, 0.12);
+  color: var(--negative);
+  border: 1px solid rgba(248, 113, 113, 0.3);
+}
+.alert.success {
+  background: rgba(74, 222, 128, 0.12);
+  color: var(--positive);
+  border: 1px solid rgba(74, 222, 128, 0.3);
+}
+.alert.warning {
+  background: rgba(240, 185, 61, 0.12);
+  color: #f0b93d;
+  border: 1px solid rgba(240, 185, 61, 0.3);
+}
+
+.stat-dot {
+  width: 0.55rem;
+  height: 0.55rem;
+  border-radius: 999px;
+  flex: 0 0 auto;
+  display: inline-block;
+}
+
+/* pill nav / segmented control */
+.nav-link,
+.pill {
+  display: inline-block;
+  padding: 0.45rem 0.85rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  font-family: inherit;
+  color: var(--muted);
+  text-decoration: none;
+  background: var(--surface-2);
+  border: none;
+  border-radius: 999px;
+  white-space: nowrap;
+  cursor: pointer;
+  transition:
+    background 0.15s ease,
+    color 0.15s ease;
+}
+.nav-link:hover,
+.pill:hover {
+  color: var(--text);
+}
+.nav-link.active,
+.pill.active {
+  color: white;
+  background: var(--primary);
+}
+
+/* ---------- KSP wordmark ---------- */
+
+.ksp-logo-compact {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.4rem;
+}
+.ksp-logo-compact .ksp-logo-mark {
+  font-size: 1.15rem;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  color: var(--primary);
+}
+.ksp-logo-compact .ksp-logo-tagline {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--text);
+}
+.ksp-logo-full {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+}
+.ksp-logo-full .ksp-logo-mark {
+  font-size: 2.75rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  color: var(--text);
+}
+.ksp-logo-divider {
+  display: flex;
+  align-items: center;
+  width: 160px;
+  max-width: 60%;
+}
+.ksp-logo-line {
+  flex: 1;
+  height: 2px;
+  background: var(--primary);
+}
+.ksp-logo-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: var(--primary);
+  flex: 0 0 auto;
+}
+.ksp-logo-dot-mid {
+  width: 7px;
+  height: 7px;
+  background: var(--surface);
+  border: 1.5px solid var(--primary);
+}
+.ksp-logo-sub {
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.35em;
+  color: var(--muted);
+  text-transform: uppercase;
 }

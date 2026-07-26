@@ -1,3 +1,5 @@
+import type { ImportedEvent } from './externalCalendar';
+
 export type CalendarView = 'month' | 'week' | 'day';
 
 export type RecurrenceRule = 'none' | 'daily' | 'weekly' | 'monthly' | 'yearly';
@@ -26,3 +28,6 @@ export interface CalendarEventInput {
   category: string | null;
   recurrence_rule: string | null;
 }
+
+/** What the calendar views render: the user's own events plus read-only events pulled from imported feeds. */
+export type DisplayEvent = (CalendarEvent & { source?: 'internal' }) | ImportedEvent;

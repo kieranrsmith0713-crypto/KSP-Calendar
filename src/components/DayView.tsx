@@ -1,13 +1,13 @@
 import { endOfDay, startOfDay } from 'date-fns';
-import type { CalendarEvent } from '../types/calendar';
+import type { DisplayEvent } from '../types/calendar';
 import { expandEventsForRange } from '../utils/recurrence';
 import { TimeGrid } from './TimeGrid';
 
 interface DayViewProps {
   currentDate: Date;
-  events: CalendarEvent[];
+  events: DisplayEvent[];
   onSlotClick: (date: Date) => void;
-  onEventClick: (event: CalendarEvent) => void;
+  onEventClick: (event: DisplayEvent) => void;
 }
 
 export function DayView({ currentDate, events, onSlotClick, onEventClick }: DayViewProps) {

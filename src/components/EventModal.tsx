@@ -1,20 +1,17 @@
 import { useEffect, useState } from 'react';
 import type { FormEvent } from 'react';
 import { format } from 'date-fns';
-import type { CalendarEvent, CalendarEventInput, RecurrenceRule } from '../types/calendar';
+import type { CalendarEvent, CalendarEventInput, DisplayEvent, RecurrenceRule } from '../types/calendar';
 import { DEFAULT_CATEGORIES } from '../utils/categories';
 import { getBaseEventId } from '../utils/recurrence';
 
 interface EventModalProps {
-  event: CalendarEvent | null;
+  event: DisplayEvent | null;
   initialDate: Date | null;
   onClose: () => void;
   onSave: (id: string | null, input: CalendarEventInput) => Promise<void>;
   onDelete: (id: string) => Promise<void>;
 }
-
-const inputClasses =
-  'rounded-md border border-slate-300 px-2 py-1.5 text-slate-900 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100';
 
 function toDateTimeLocal(date: Date): string {
   return format(date, "yyyy-MM-dd'T'HH:mm");
@@ -25,6 +22,57 @@ function toDateOnly(date: Date): string {
 }
 
 export function EventModal({ event, initialDate, onClose, onSave, onDelete }: EventModalProps) {
+  if (event && event.source === 'external') {
+    return <ImportedEventDetails event={event} onClose={onClose} />;
+  }
+
+  return (
+    <InternalEventForm event={event} initialDate={initialDate} onClose={onClose} onSave={onSave} onDelete={onDelete} />
+  );
+}
+
+function ImportedEventDetails({ event, onClose }: { event: Extract<DisplayEvent, { source: 'external' }>; onClose: () => void }) {
+  const start = new Date(event.start_time);
+  const end = new Date(event.end_time);
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/60 sm:items-center" onClick={onClose}>
+      <div
+        onClick={(e) => e.stopPropagation()}
+        className="card max-h-[90vh] w-full max-w-md overflow-y-auto rounded-b-none sm:rounded-b-[var(--radius)]"
+      >
+        <div className="mb-1 flex items-center gap-2">
+          <span className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: event.calendarColor }} />
+          <span className="text-xs font-semibold uppercase tracking-wide text-[var(--muted)]">{event.calendarName}</span>
+        </div>
+        <h2 className="mb-3 text-lg text-[var(--text)]">{event.title}</h2>
+        <p className="mb-1 text-sm text-[var(--text)]">
+          {event.all_day
+            ? format(start, 'EEEE d MMMM yyyy')
+            : `${format(start, 'EEEE d MMMM yyyy, HH:mm')} – ${format(end, 'HH:mm')}`}
+        </p>
+        {event.location && <p className="mb-1 text-sm text-[var(--text)]">📍 {event.location}</p>}
+        {event.description && <p className="mb-3 whitespace-pre-wrap text-sm muted">{event.description}</p>}
+        <p className="hint muted">Imported — edit this in {event.calendarName} instead.</p>
+        <div className="mt-3 flex justify-end">
+          <button onClick={onClose} className="btn">
+            Close
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+interface InternalEventFormProps {
+  event: (CalendarEvent & { source?: 'internal' }) | null;
+  initialDate: Date | null;
+  onClose: () => void;
+  onSave: (id: string | null, input: CalendarEventInput) => Promise<void>;
+  onDelete: (id: string) => Promise<void>;
+}
+
+function InternalEventForm({ event, initialDate, onClose, onSave, onDelete }: InternalEventFormProps) {
   const isEditing = Boolean(event);
   const startBasis = event ? new Date(event.start_time) : (initialDate ?? new Date());
   const endBasis = event ? new Date(event.end_time) : (initialDate ?? new Date());
@@ -98,77 +146,71 @@ export function EventModal({ event, initialDate, onClose, onSave, onDelete }: Ev
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 sm:items-center" onClick={onClose}>
+    <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/60 sm:items-center" onClick={onClose}>
       <form
         onClick={(e) => e.stopPropagation()}
         onSubmit={handleSubmit}
-        className="max-h-[90vh] w-full max-w-md overflow-y-auto rounded-t-xl bg-white p-4 shadow-xl sm:rounded-xl dark:bg-slate-900"
+        className="card max-h-[90vh] w-full max-w-md overflow-y-auto rounded-b-none sm:rounded-b-[var(--radius)]"
       >
-        <h2 className="mb-3 text-lg font-semibold text-slate-900 dark:text-slate-100">
-          {isEditing ? 'Edit event' : 'New event'}
-        </h2>
+        <h2 className="mb-3 text-lg text-[var(--text)]">{isEditing ? 'Edit event' : 'New event'}</h2>
 
         {event?.recurrence_rule && (
-          <p className="mb-2 text-xs text-slate-500 dark:text-slate-400">
-            This is a recurring event — changes apply to the whole series.
-          </p>
+          <p className="hint muted mb-2">This is a recurring event — changes apply to the whole series.</p>
         )}
 
-        {error && <p className="mb-2 text-sm text-red-600">{error}</p>}
+        {error && <p className="alert error mb-2">{error}</p>}
 
-        <div className="flex flex-col gap-3">
-          <label className="flex flex-col gap-1 text-sm text-slate-700 dark:text-slate-300">
-            Title
-            <input value={title} onChange={(e) => setTitle(e.target.value)} required className={inputClasses} />
+        <div className="stack" style={{ gap: '0.75rem' }}>
+          <label className="field">
+            <span>Title</span>
+            <input value={title} onChange={(e) => setTitle(e.target.value)} required />
           </label>
 
-          <label className="flex flex-col gap-1 text-sm text-slate-700 dark:text-slate-300">
-            Description
-            <textarea
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              rows={2}
-              className={inputClasses}
+          <label className="field">
+            <span>Description</span>
+            <textarea value={description} onChange={(e) => setDescription(e.target.value)} rows={2} />
+          </label>
+
+          <label className="row items-center text-sm text-[var(--text)]">
+            <input
+              type="checkbox"
+              checked={allDay}
+              onChange={(e) => setAllDay(e.target.checked)}
+              style={{ width: 'auto' }}
             />
-          </label>
-
-          <label className="flex items-center gap-2 text-sm text-slate-700 dark:text-slate-300">
-            <input type="checkbox" checked={allDay} onChange={(e) => setAllDay(e.target.checked)} />
             All-day
           </label>
 
-          <div className="flex gap-2">
-            <label className="flex flex-1 flex-col gap-1 text-sm text-slate-700 dark:text-slate-300">
-              Start
+          <div className="row">
+            <label className="field" style={{ flex: 1 }}>
+              <span>Start</span>
               <input
                 type={allDay ? 'date' : 'datetime-local'}
                 value={startInput}
                 onChange={(e) => setStartInput(e.target.value)}
                 required
-                className={inputClasses}
               />
             </label>
-            <label className="flex flex-1 flex-col gap-1 text-sm text-slate-700 dark:text-slate-300">
-              End
+            <label className="field" style={{ flex: 1 }}>
+              <span>End</span>
               <input
                 type={allDay ? 'date' : 'datetime-local'}
                 value={endInput}
                 onChange={(e) => setEndInput(e.target.value)}
                 required
-                className={inputClasses}
               />
             </label>
           </div>
 
-          <label className="flex flex-col gap-1 text-sm text-slate-700 dark:text-slate-300">
-            Location
-            <input value={location} onChange={(e) => setLocation(e.target.value)} className={inputClasses} />
+          <label className="field">
+            <span>Location</span>
+            <input value={location} onChange={(e) => setLocation(e.target.value)} />
           </label>
 
-          <div className="flex gap-2">
-            <label className="flex flex-1 flex-col gap-1 text-sm text-slate-700 dark:text-slate-300">
-              Category
-              <select value={category} onChange={(e) => setCategory(e.target.value)} className={inputClasses}>
+          <div className="row">
+            <label className="field" style={{ flex: 1 }}>
+              <span>Category</span>
+              <select value={category} onChange={(e) => setCategory(e.target.value)}>
                 <option value="">None</option>
                 {DEFAULT_CATEGORIES.map((c) => (
                   <option key={c} value={c}>
@@ -177,13 +219,9 @@ export function EventModal({ event, initialDate, onClose, onSave, onDelete }: Ev
                 ))}
               </select>
             </label>
-            <label className="flex flex-1 flex-col gap-1 text-sm text-slate-700 dark:text-slate-300">
-              Repeats
-              <select
-                value={recurrence}
-                onChange={(e) => setRecurrence(e.target.value as RecurrenceRule)}
-                className={inputClasses}
-              >
+            <label className="field" style={{ flex: 1 }}>
+              <span>Repeats</span>
+              <select value={recurrence} onChange={(e) => setRecurrence(e.target.value as RecurrenceRule)}>
                 <option value="none">Does not repeat</option>
                 <option value="daily">Daily</option>
                 <option value="weekly">Weekly</option>
@@ -197,29 +235,16 @@ export function EventModal({ event, initialDate, onClose, onSave, onDelete }: Ev
         <div className="mt-4 flex items-center justify-between">
           <div>
             {isEditing && (
-              <button
-                type="button"
-                onClick={handleDelete}
-                disabled={saving}
-                className="rounded-md px-3 py-1.5 text-sm font-medium text-red-600 hover:bg-red-50 dark:hover:bg-red-950"
-              >
+              <button type="button" onClick={handleDelete} disabled={saving} className="btn danger small">
                 Delete
               </button>
             )}
           </div>
-          <div className="flex gap-2">
-            <button
-              type="button"
-              onClick={onClose}
-              className="rounded-md border border-slate-300 px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-100 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800"
-            >
+          <div className="row">
+            <button type="button" onClick={onClose} className="btn">
               Cancel
             </button>
-            <button
-              type="submit"
-              disabled={saving}
-              className="rounded-md bg-violet-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-violet-700 disabled:opacity-50"
-            >
+            <button type="submit" disabled={saving} className="btn primary">
               {saving ? 'Saving…' : 'Save'}
             </button>
           </div>
