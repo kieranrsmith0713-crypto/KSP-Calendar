@@ -1,9 +1,11 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { addDays, addMonths, addWeeks, subDays, subMonths, subWeeks } from 'date-fns';
 import type { CalendarEventInput, CalendarView, DisplayEvent } from '../types/calendar';
 import { useCalendarEvents } from '../hooks/useCalendarEvents';
 import { useExternalCalendars } from '../hooks/useExternalCalendars';
 import { useImportedEvents } from '../hooks/useImportedEvents';
+import { useTodos } from '../hooks/useTodos';
+import { expandTodosForRange } from '../utils/todoOccurrence';
 import { CalendarHeader } from '../components/CalendarHeader';
 import { MonthView } from '../components/MonthView';
 import { WeekView } from '../components/WeekView';
@@ -28,6 +30,7 @@ export function CalendarPage() {
     deleteCalendar,
   } = useExternalCalendars();
   const { events: importedEvents, errors: importErrors } = useImportedEvents(externalCalendars);
+  const { todos, error: todosError } = useTodos();
 
   const [currentDate, setCurrentDate] = useState(new Date());
   const [view, setView] = useState<CalendarView>('month');
@@ -56,9 +59,16 @@ export function CalendarPage() {
     else await createEvent(input);
   };
 
+  const todoEvents = useMemo(() => {
+    const rangeStart = subMonths(new Date(), 3);
+    const rangeEnd = addMonths(new Date(), 12);
+    return expandTodosForRange(todos, rangeStart, rangeEnd);
+  }, [todos]);
+
   const displayEvents: DisplayEvent[] = [
     ...events.map((event) => ({ ...event, source: 'internal' as const })),
     ...importedEvents,
+    ...todoEvents,
   ];
 
   const importErrorMessages = Object.values(importErrors);
@@ -87,6 +97,9 @@ export function CalendarPage() {
         <p className="alert error m-2 text-center" role="alert">
           {externalCalendarsError}
         </p>
+      )}
+      {todosError && (
+        <p className="alert warning m-2 text-center">Couldn't load tasks from KSP To-do: {todosError}</p>
       )}
       {importErrorMessages.length > 0 && (
         <p className="alert warning m-2 text-center">

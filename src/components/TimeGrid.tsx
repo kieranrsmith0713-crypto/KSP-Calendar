@@ -1,6 +1,6 @@
 import { format, isSameDay } from 'date-fns';
 import type { DisplayEvent } from '../types/calendar';
-import { getEventVisual } from '../utils/eventVisual';
+import { getEventIcon, getEventVisual } from '../utils/eventVisual';
 
 interface TimeGridProps {
   days: Date[];
@@ -49,6 +49,7 @@ export function TimeGrid({ days, events, onSlotClick, onEventClick }: TimeGridPr
                       style={visual.style}
                       className={`truncate rounded px-1 py-0.5 text-[11px] ${visual.className}`}
                     >
+                      {getEventIcon(event)}
                       {event.title}
                     </span>
                   );
@@ -99,6 +100,7 @@ export function TimeGrid({ days, events, onSlotClick, onEventClick }: TimeGridPr
                       style={{ top, height, ...visual.style }}
                       className={`absolute left-0.5 right-0.5 overflow-hidden rounded px-1 text-[11px] ${visual.className}`}
                     >
+                      {getEventIcon(event)}
                       {format(start, 'HH:mm')} {event.title}
                     </div>
                   );

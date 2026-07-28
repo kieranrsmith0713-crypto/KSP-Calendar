@@ -27,6 +27,10 @@ export function EventModal({ event, initialDate, draft, onClose, onSave, onDelet
     return <ImportedEventDetails event={event} onClose={onClose} />;
   }
 
+  if (event && event.source === 'todo') {
+    return <TodoDetails event={event} onClose={onClose} />;
+  }
+
   return (
     <InternalEventForm
       event={event}
@@ -64,6 +68,50 @@ function ImportedEventDetails({ event, onClose }: { event: Extract<DisplayEvent,
         <p className="hint muted">Imported — edit this in {event.calendarName} instead.</p>
         <div className="mt-3 flex justify-end">
           <button onClick={onClose} className="btn">
+            Close
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+const TODO_APP_URL = 'https://todo.ksponline.co.uk';
+const PRIORITY_LABELS: Record<Extract<DisplayEvent, { source: 'todo' }>['priority'], string> = {
+  high: 'High',
+  medium: 'Medium',
+  low: 'Low',
+};
+
+function TodoDetails({ event, onClose }: { event: Extract<DisplayEvent, { source: 'todo' }>; onClose: () => void }) {
+  const due = new Date(event.start_time);
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/60 sm:items-center" onClick={onClose}>
+      <div
+        onClick={(e) => e.stopPropagation()}
+        className="card max-h-[90vh] w-full max-w-md overflow-y-auto rounded-b-none sm:rounded-b-[var(--radius)]"
+      >
+        <span className="text-xs font-semibold uppercase tracking-wide text-[var(--muted)]">
+          {event.completed ? 'Completed task' : 'Task'} · KSP To-do
+        </span>
+        <h2
+          className="mb-3 mt-1 text-lg text-[var(--text)]"
+          style={{ textDecoration: event.completed ? 'line-through' : 'none' }}
+        >
+          {event.title}
+        </h2>
+        <p className="mb-1 text-sm text-[var(--text)]">Due {format(due, 'EEEE d MMMM yyyy, HH:mm')}</p>
+        <p className="mb-1 text-sm text-[var(--text)]">Priority: {PRIORITY_LABELS[event.priority]}</p>
+        {event.category && <p className="mb-1 text-sm text-[var(--text)]">🏷️ {event.category}</p>}
+        {event.recurrence && <p className="mb-1 text-sm muted">Repeats {event.recurrence}</p>}
+        {event.description && <p className="mb-3 whitespace-pre-wrap text-sm muted">{event.description}</p>}
+        <p className="hint muted">Manage this task in KSP To-do.</p>
+        <div className="mt-3 flex justify-end gap-2">
+          <a href={TODO_APP_URL} target="_blank" rel="noreferrer" className="btn">
+            Open To-do
+          </a>
+          <button onClick={onClose} className="btn primary">
             Close
           </button>
         </div>

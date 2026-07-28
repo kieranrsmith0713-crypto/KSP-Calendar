@@ -1,4 +1,5 @@
 import type { ImportedEvent } from './externalCalendar';
+import type { TodoEvent } from './todo';
 
 export type CalendarView = 'month' | 'week' | 'day';
 
@@ -29,5 +30,5 @@ export interface CalendarEventInput {
   recurrence_rule: string | null;
 }
 
-/** What the calendar views render: the user's own events plus read-only events pulled from imported feeds. */
-export type DisplayEvent = (CalendarEvent & { source?: 'internal' }) | ImportedEvent;
+/** What the calendar views render: the user's own events, read-only imported-feed events, and read-only KSP To-do tasks. */
+export type DisplayEvent = (CalendarEvent & { source?: 'internal' }) | ImportedEvent | TodoEvent;
