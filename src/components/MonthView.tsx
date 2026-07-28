@@ -8,12 +8,13 @@ interface MonthViewProps {
   events: DisplayEvent[];
   onDayClick: (date: Date) => void;
   onEventClick: (event: DisplayEvent) => void;
+  onShowMore: (date: Date, dayEvents: DisplayEvent[]) => void;
 }
 
 const WEEKDAY_LABELS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 const MAX_VISIBLE_EVENTS = 3;
 
-export function MonthView({ currentDate, events, onDayClick, onEventClick }: MonthViewProps) {
+export function MonthView({ currentDate, events, onDayClick, onEventClick, onShowMore }: MonthViewProps) {
   const monthStart = startOfMonth(currentDate);
   const monthEnd = endOfMonth(currentDate);
   const gridStart = startOfWeek(monthStart, { weekStartsOn: 1 });
@@ -74,9 +75,16 @@ export function MonthView({ currentDate, events, onDayClick, onEventClick }: Mon
                   );
                 })}
                 {dayEvents.length > MAX_VISIBLE_EVENTS && (
-                  <span className="text-[11px] text-[var(--muted)]">
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onShowMore(day, dayEvents);
+                    }}
+                    className="text-left text-[11px] font-semibold text-[var(--muted)] hover:text-[var(--text)] hover:underline"
+                  >
                     +{dayEvents.length - MAX_VISIBLE_EVENTS} more
-                  </span>
+                  </button>
                 )}
               </div>
             </div>

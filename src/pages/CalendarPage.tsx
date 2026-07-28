@@ -13,11 +13,17 @@ import { DayView } from '../components/DayView';
 import { EventModal } from '../components/EventModal';
 import { ManageCalendarsModal } from '../components/ManageCalendarsModal';
 import { QuickAddBar } from '../components/QuickAddBar';
+import { DayAgendaModal } from '../components/DayAgendaModal';
 
 interface ModalState {
   event: DisplayEvent | null;
   date: Date | null;
   draft?: CalendarEventInput;
+}
+
+interface DayAgendaState {
+  date: Date;
+  events: DisplayEvent[];
 }
 
 export function CalendarPage() {
@@ -36,6 +42,7 @@ export function CalendarPage() {
   const [view, setView] = useState<CalendarView>('month');
   const [modalState, setModalState] = useState<ModalState | null>(null);
   const [manageCalendarsOpen, setManageCalendarsOpen] = useState(false);
+  const [dayAgenda, setDayAgenda] = useState<DayAgendaState | null>(null);
 
   const goToday = () => setCurrentDate(new Date());
   const goPrev = () => {
@@ -53,6 +60,17 @@ export function CalendarPage() {
   const openEditEvent = (event: DisplayEvent) => setModalState({ event, date: null });
   const openQuickAddDraft = (draft: CalendarEventInput) => setModalState({ event: null, date: null, draft });
   const closeModal = () => setModalState(null);
+
+  const openDayAgenda = (date: Date, dayEvents: DisplayEvent[]) => setDayAgenda({ date, events: dayEvents });
+  const closeDayAgenda = () => setDayAgenda(null);
+  const editEventFromAgenda = (event: DisplayEvent) => {
+    setDayAgenda(null);
+    openEditEvent(event);
+  };
+  const addEventFromAgenda = (date: Date) => {
+    setDayAgenda(null);
+    openNewEvent(date);
+  };
 
   const handleSave = async (id: string | null, input: CalendarEventInput) => {
     if (id) await updateEvent(id, input);
@@ -111,7 +129,13 @@ export function CalendarPage() {
         {loading ? (
           <div className="flex h-full items-center justify-center muted">Loading events…</div>
         ) : view === 'month' ? (
-          <MonthView currentDate={currentDate} events={displayEvents} onDayClick={openNewEvent} onEventClick={openEditEvent} />
+          <MonthView
+            currentDate={currentDate}
+            events={displayEvents}
+            onDayClick={openNewEvent}
+            onEventClick={openEditEvent}
+            onShowMore={openDayAgenda}
+          />
         ) : view === 'week' ? (
           <WeekView currentDate={currentDate} events={displayEvents} onSlotClick={openNewEvent} onEventClick={openEditEvent} />
         ) : (
@@ -127,6 +151,16 @@ export function CalendarPage() {
           onClose={closeModal}
           onSave={handleSave}
           onDelete={deleteEvent}
+        />
+      )}
+
+      {dayAgenda && (
+        <DayAgendaModal
+          date={dayAgenda.date}
+          events={dayAgenda.events}
+          onClose={closeDayAgenda}
+          onEventClick={editEventFromAgenda}
+          onAddEvent={addEventFromAgenda}
         />
       )}
 
