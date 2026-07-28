@@ -18,12 +18,15 @@ export function getEventVisual(event: DisplayEvent): { className: string; style:
         : getCategoryColor(event.category);
   return {
     className: 'border-l-2 text-[var(--text)]',
-    style: { backgroundColor: `${color}26`, borderColor: color },
+    style: {
+      backgroundColor: `${color}26`,
+      borderColor: color,
+      textDecoration: event.source === 'todo' && event.completed ? 'line-through' : undefined,
+    },
   };
 }
 
-/** A small prefix marking a to-do task apart from a real event, since color alone is subtle. */
-export function getEventIcon(event: DisplayEvent): string {
-  if (event.source !== 'todo') return '';
-  return event.completed ? '✓ ' : '☐ ';
+/** A task's calendar entry shows just its name — no time prefix (its "time" is a due time, not a slot). */
+export function shouldShowTimePrefix(event: DisplayEvent): boolean {
+  return event.source !== 'todo' && !event.all_day;
 }

@@ -1,7 +1,7 @@
 import { eachDayOfInterval, endOfMonth, endOfWeek, format, isSameDay, isSameMonth, isToday, startOfMonth, startOfWeek } from 'date-fns';
 import type { DisplayEvent } from '../types/calendar';
 import { expandEventsForRange } from '../utils/recurrence';
-import { getEventIcon, getEventVisual } from '../utils/eventVisual';
+import { getEventVisual, shouldShowTimePrefix } from '../utils/eventVisual';
 
 interface MonthViewProps {
   currentDate: Date;
@@ -68,8 +68,7 @@ export function MonthView({ currentDate, events, onDayClick, onEventClick }: Mon
                       style={visual.style}
                       className={`truncate rounded px-1 py-0.5 text-[11px] ${visual.className}`}
                     >
-                      {getEventIcon(event)}
-                      {event.all_day ? '' : `${format(new Date(event.start_time), 'HH:mm')} `}
+                      {shouldShowTimePrefix(event) ? `${format(new Date(event.start_time), 'HH:mm')} ` : ''}
                       {event.title}
                     </span>
                   );
