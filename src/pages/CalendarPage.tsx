@@ -10,10 +10,12 @@ import { WeekView } from '../components/WeekView';
 import { DayView } from '../components/DayView';
 import { EventModal } from '../components/EventModal';
 import { ManageCalendarsModal } from '../components/ManageCalendarsModal';
+import { QuickAddBar } from '../components/QuickAddBar';
 
 interface ModalState {
   event: DisplayEvent | null;
   date: Date | null;
+  draft?: CalendarEventInput;
 }
 
 export function CalendarPage() {
@@ -46,6 +48,7 @@ export function CalendarPage() {
 
   const openNewEvent = (date: Date) => setModalState({ event: null, date });
   const openEditEvent = (event: DisplayEvent) => setModalState({ event, date: null });
+  const openQuickAddDraft = (draft: CalendarEventInput) => setModalState({ event: null, date: null, draft });
   const closeModal = () => setModalState(null);
 
   const handleSave = async (id: string | null, input: CalendarEventInput) => {
@@ -72,6 +75,8 @@ export function CalendarPage() {
         onAddEvent={() => openNewEvent(currentDate)}
         onManageCalendars={() => setManageCalendarsOpen(true)}
       />
+
+      <QuickAddBar onParsed={openQuickAddDraft} />
 
       {error && (
         <p className="alert error m-2 text-center" role="alert">
@@ -105,6 +110,7 @@ export function CalendarPage() {
         <EventModal
           event={modalState.event}
           initialDate={modalState.date}
+          draft={modalState.draft}
           onClose={closeModal}
           onSave={handleSave}
           onDelete={deleteEvent}

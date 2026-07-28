@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import type { FormEvent } from 'react';
 import { format } from 'date-fns';
 import type { CalendarEvent, CalendarEventInput, DisplayEvent, RecurrenceRule } from '../types/calendar';
@@ -8,6 +8,7 @@ import { getBaseEventId } from '../utils/recurrence';
 interface EventModalProps {
   event: DisplayEvent | null;
   initialDate: Date | null;
+  draft?: CalendarEventInput | null;
   onClose: () => void;
   onSave: (id: string | null, input: CalendarEventInput) => Promise<void>;
   onDelete: (id: string) => Promise<void>;
@@ -21,13 +22,20 @@ function toDateOnly(date: Date): string {
   return format(date, 'yyyy-MM-dd');
 }
 
-export function EventModal({ event, initialDate, onClose, onSave, onDelete }: EventModalProps) {
+export function EventModal({ event, initialDate, draft, onClose, onSave, onDelete }: EventModalProps) {
   if (event && event.source === 'external') {
     return <ImportedEventDetails event={event} onClose={onClose} />;
   }
 
   return (
-    <InternalEventForm event={event} initialDate={initialDate} onClose={onClose} onSave={onSave} onDelete={onDelete} />
+    <InternalEventForm
+      event={event}
+      initialDate={initialDate}
+      draft={draft}
+      onClose={onClose}
+      onSave={onSave}
+      onDelete={onDelete}
+    />
   );
 }
 
@@ -67,35 +75,47 @@ function ImportedEventDetails({ event, onClose }: { event: Extract<DisplayEvent,
 interface InternalEventFormProps {
   event: (CalendarEvent & { source?: 'internal' }) | null;
   initialDate: Date | null;
+  draft?: CalendarEventInput | null;
   onClose: () => void;
   onSave: (id: string | null, input: CalendarEventInput) => Promise<void>;
   onDelete: (id: string) => Promise<void>;
 }
 
-function InternalEventForm({ event, initialDate, onClose, onSave, onDelete }: InternalEventFormProps) {
+function InternalEventForm({ event, initialDate, draft, onClose, onSave, onDelete }: InternalEventFormProps) {
   const isEditing = Boolean(event);
-  const startBasis = event ? new Date(event.start_time) : (initialDate ?? new Date());
-  const endBasis = event ? new Date(event.end_time) : (initialDate ?? new Date());
+  const hasExplicitTime = Boolean(event || draft);
+  const startBasis = event ? new Date(event.start_time) : new Date(draft?.start_time ?? initialDate ?? new Date());
+  const endBasis = event ? new Date(event.end_time) : new Date(draft?.end_time ?? initialDate ?? new Date());
+  const initialAllDay = event?.all_day ?? draft?.all_day ?? false;
 
-  const [title, setTitle] = useState(event?.title ?? '');
-  const [description, setDescription] = useState(event?.description ?? '');
-  const [allDay, setAllDay] = useState(event?.all_day ?? false);
-  const [startInput, setStartInput] = useState(
-    event?.all_day ? toDateOnly(startBasis) : toDateTimeLocal(startBasis),
+  const [title, setTitle] = useState(event?.title ?? draft?.title ?? '');
+  const [description, setDescription] = useState(event?.description ?? draft?.description ?? '');
+  const [allDay, setAllDay] = useState(initialAllDay);
+  const [startInput, setStartInput] = useState(() => {
+    if (initialAllDay) return toDateOnly(startBasis);
+    return hasExplicitTime ? toDateTimeLocal(startBasis) : `${toDateOnly(startBasis)}T09:00`;
+  });
+  const [endInput, setEndInput] = useState(() => {
+    if (initialAllDay) return toDateOnly(endBasis);
+    return hasExplicitTime ? toDateTimeLocal(endBasis) : `${toDateOnly(endBasis)}T10:00`;
+  });
+  const [location, setLocation] = useState(event?.location ?? draft?.location ?? '');
+  const [category, setCategory] = useState(event?.category ?? draft?.category ?? '');
+  const [recurrence, setRecurrence] = useState<RecurrenceRule>(
+    (event?.recurrence_rule as RecurrenceRule) ?? (draft?.recurrence_rule as RecurrenceRule) ?? 'none',
   );
-  const [endInput, setEndInput] = useState(event?.all_day ? toDateOnly(endBasis) : toDateTimeLocal(endBasis));
-  const [location, setLocation] = useState(event?.location ?? '');
-  const [category, setCategory] = useState(event?.category ?? '');
-  const [recurrence, setRecurrence] = useState<RecurrenceRule>((event?.recurrence_rule as RecurrenceRule) ?? 'none');
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    setStartInput((prev) => (allDay ? prev.slice(0, 10) : `${prev.slice(0, 10)}T09:00`));
-    setEndInput((prev) => (allDay ? prev.slice(0, 10) : `${prev.slice(0, 10)}T10:00`));
-    // Only re-run when the all-day toggle itself changes.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [allDay]);
+  // Resets the time-of-day to a sensible default on a genuine user toggle of all-day.
+  // Lives in the handler (not an effect keyed on `allDay`) so it never fires on mount —
+  // an effect would also double-fire under StrictMode's dev remount simulation, clobbering
+  // a real event's time or a quick-add draft's parsed time either way.
+  const handleAllDayToggle = (checked: boolean) => {
+    setAllDay(checked);
+    setStartInput((prev) => (checked ? prev.slice(0, 10) : `${prev.slice(0, 10)}T09:00`));
+    setEndInput((prev) => (checked ? prev.slice(0, 10) : `${prev.slice(0, 10)}T10:00`));
+  };
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -154,6 +174,8 @@ function InternalEventForm({ event, initialDate, onClose, onSave, onDelete }: In
       >
         <h2 className="mb-3 text-lg text-[var(--text)]">{isEditing ? 'Edit event' : 'New event'}</h2>
 
+        {!isEditing && draft && <p className="hint muted mb-2">Parsed from quick add — check the details below.</p>}
+
         {event?.recurrence_rule && (
           <p className="hint muted mb-2">This is a recurring event — changes apply to the whole series.</p>
         )}
@@ -175,7 +197,7 @@ function InternalEventForm({ event, initialDate, onClose, onSave, onDelete }: In
             <input
               type="checkbox"
               checked={allDay}
-              onChange={(e) => setAllDay(e.target.checked)}
+              onChange={(e) => handleAllDayToggle(e.target.checked)}
               style={{ width: 'auto' }}
             />
             All-day
