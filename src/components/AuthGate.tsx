@@ -8,7 +8,7 @@ const HUB_DASHBOARD_URL = 'https://hub.ksponline.co.uk/dashboard';
 
 function SplashScreen({ message }: { message: string }) {
   return (
-    <div className="flex h-screen flex-col items-center justify-center gap-4 bg-[var(--bg)]">
+    <div className="splash-screen">
       <KSPLogo variant="full" />
       <p className="muted text-sm">{message}</p>
     </div>
@@ -35,11 +35,11 @@ export function AuthGate({ children }: { children: ReactNode }) {
 
   if (!hasAccess) {
     return (
-      <div className="flex h-screen flex-col items-center justify-center gap-4 bg-[var(--bg)] px-6 text-center">
+      <div className="splash-screen no-access">
         <KSPLogo variant="full" />
         <p className="muted text-sm">
           You don't have access to Calendar. Ask your admin to grant it from the Hub, or{' '}
-          <a href={HUB_DASHBOARD_URL} className="underline">
+          <a href={HUB_DASHBOARD_URL} style={{ textDecoration: 'underline' }}>
             go back to the Hub
           </a>
           .

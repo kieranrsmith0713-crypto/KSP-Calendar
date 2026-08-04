@@ -19,12 +19,12 @@ export function QuickAddBar({ onParsed }: QuickAddBarProps) {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="flex gap-2 border-b border-[var(--border)] bg-[var(--surface)] p-3">
+    <form onSubmit={handleSubmit} className="quickadd-bar">
       <input
         value={text}
         onChange={(e) => setText(e.target.value)}
         placeholder='Quick add — e.g. "Bins every Sunday at 5pm"'
-        className="flex-1"
+        className="quickadd-input"
       />
       <button type="submit" className="btn primary small">
         Add

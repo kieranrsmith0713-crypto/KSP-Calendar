@@ -92,7 +92,7 @@ export function CalendarPage() {
   const importErrorMessages = Object.values(importErrors);
 
   return (
-    <div className="flex h-screen flex-col bg-[var(--bg)]">
+    <div className="calendar-page">
       <CalendarHeader
         currentDate={currentDate}
         view={view}
@@ -107,27 +107,27 @@ export function CalendarPage() {
       <QuickAddBar onParsed={openQuickAddDraft} />
 
       {error && (
-        <p className="alert error m-2 text-center" role="alert">
+        <p className="alert error calendar-alert" role="alert">
           {error}
         </p>
       )}
       {externalCalendarsError && (
-        <p className="alert error m-2 text-center" role="alert">
+        <p className="alert error calendar-alert" role="alert">
           {externalCalendarsError}
         </p>
       )}
       {todosError && (
-        <p className="alert warning m-2 text-center">Couldn't load tasks from KSP To-do: {todosError}</p>
+        <p className="alert warning calendar-alert">Couldn't load tasks from KSP To-do: {todosError}</p>
       )}
       {importErrorMessages.length > 0 && (
-        <p className="alert warning m-2 text-center">
+        <p className="alert warning calendar-alert">
           Couldn't load {importErrorMessages.length === 1 ? 'a calendar' : 'some calendars'}: {importErrorMessages.join(' · ')}
         </p>
       )}
 
-      <div className="flex-1 overflow-hidden">
+      <div className="calendar-body">
         {loading ? (
-          <div className="flex h-full items-center justify-center muted">Loading events…</div>
+          <div className="calendar-loading muted">Loading events…</div>
         ) : view === 'month' ? (
           <MonthView
             currentDate={currentDate}

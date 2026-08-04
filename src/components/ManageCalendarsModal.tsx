@@ -46,30 +46,24 @@ export function ManageCalendarsModal({ calendars, errors, onAdd, onToggle, onDel
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/60 sm:items-center" onClick={onClose}>
-      <div
-        onClick={(e) => e.stopPropagation()}
-        className="card max-h-[90vh] w-full max-w-md overflow-y-auto rounded-b-none sm:rounded-b-[var(--radius)]"
-      >
-        <div className="mb-3 flex items-center justify-between">
-          <h2 className="text-lg text-[var(--text)]">Imported calendars</h2>
+    <div className="modal-backdrop" onClick={onClose}>
+      <div onClick={(e) => e.stopPropagation()} className="card modal-panel">
+        <div className="modal-header-row">
+          <h2 className="modal-title no-margin">Imported calendars</h2>
           <button onClick={onClose} className="btn link small">
             Close
           </button>
         </div>
 
-        <ul className="stack mb-4" style={{ gap: '0.5rem' }}>
+        <ul className="stack" style={{ gap: '0.5rem', marginBottom: '1rem' }}>
           {calendars.map((cal) => (
-            <li
-              key={cal.id}
-              className="flex items-center gap-2 rounded-[10px] border border-[var(--border)] bg-[var(--surface-2)] p-2"
-            >
-              <span className="h-3 w-3 shrink-0 rounded-full" style={{ backgroundColor: cal.color }} />
-              <div className="min-w-0 flex-1">
-                <p className="truncate text-sm font-semibold text-[var(--text)]">{cal.name}</p>
-                {errors[cal.id] && <p className="truncate text-xs text-[var(--negative)]">{errors[cal.id]}</p>}
+            <li key={cal.id} className="calendar-list-item">
+              <span className="calendar-swatch" style={{ backgroundColor: cal.color }} />
+              <div className="calendar-list-item-main">
+                <p className="calendar-list-item-name">{cal.name}</p>
+                {errors[cal.id] && <p className="calendar-list-item-error">{errors[cal.id]}</p>}
               </div>
-              <label className="flex items-center gap-1 text-xs muted">
+              <label className="calendar-toggle-label text-xs muted">
                 <input
                   type="checkbox"
                   checked={cal.enabled}
@@ -86,8 +80,8 @@ export function ManageCalendarsModal({ calendars, errors, onAdd, onToggle, onDel
           {calendars.length === 0 && <li className="text-sm muted">No imported calendars yet.</li>}
         </ul>
 
-        <form onSubmit={handleAdd} className="stack border-t border-[var(--border)] pt-3" style={{ gap: '0.5rem' }}>
-          <p className="text-sm font-semibold text-[var(--text)]">Add a calendar</p>
+        <form onSubmit={handleAdd} className="stack add-calendar-form" style={{ gap: '0.5rem' }}>
+          <p className="add-calendar-heading">Add a calendar</p>
           <p className="hint muted" style={{ margin: 0 }}>
             Paste an iCal (.ics) feed URL — in Google Calendar this is under Settings → your calendar → "Secret
             address in iCal format". Outlook and Apple Calendar offer similar ICS links.
@@ -99,7 +93,7 @@ export function ManageCalendarsModal({ calendars, errors, onAdd, onToggle, onDel
             onChange={(e) => setUrl(e.target.value)}
             placeholder="https://calendar.google.com/calendar/ical/.../basic.ics"
           />
-          <div className="row items-center">
+          <div className="row align-center">
             <label className="text-xs muted">Color</label>
             <input type="color" value={color} onChange={(e) => setColor(e.target.value)} />
             <button type="submit" disabled={saving} className="btn primary ml-auto">

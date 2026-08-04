@@ -34,32 +34,24 @@ export function CalendarHeader({
   onManageCalendars,
 }: CalendarHeaderProps) {
   return (
-    <header className="flex flex-col gap-3 border-b border-[var(--border)] bg-[var(--surface)] p-3 sm:flex-row sm:items-center sm:justify-between">
-      <div className="flex items-center gap-3">
-        <KSPLogo className="hidden sm:inline-flex" />
+    <header className="calendar-header">
+      <div className="calendar-header-left">
+        <KSPLogo className="calendar-logo-desktop" />
         <button onClick={onToday} className="btn small">
           Today
         </button>
-        <div className="flex items-center gap-1">
-          <button
-            onClick={onPrev}
-            aria-label="Previous"
-            className="rounded-md p-1.5 text-[var(--muted)] hover:bg-[var(--surface-2)] hover:text-[var(--text)]"
-          >
+        <div className="calendar-nav-arrows">
+          <button onClick={onPrev} aria-label="Previous" className="nav-arrow-btn">
             ‹
           </button>
-          <button
-            onClick={onNext}
-            aria-label="Next"
-            className="rounded-md p-1.5 text-[var(--muted)] hover:bg-[var(--surface-2)] hover:text-[var(--text)]"
-          >
+          <button onClick={onNext} aria-label="Next" className="nav-arrow-btn">
             ›
           </button>
         </div>
-        <h1 className="text-lg font-extrabold text-[var(--text)]">{headingLabel(currentDate, view)}</h1>
+        <h1 className="calendar-heading">{headingLabel(currentDate, view)}</h1>
       </div>
 
-      <div className="flex items-center gap-2">
+      <div className="calendar-header-right">
         <div className="row">
           {(Object.keys(VIEW_LABELS) as CalendarView[]).map((key) => (
             <button

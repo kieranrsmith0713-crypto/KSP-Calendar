@@ -23,15 +23,15 @@ export function MonthView({ currentDate, events, onDayClick, onEventClick, onSho
   const expandedEvents = expandEventsForRange(events, gridStart, gridEnd);
 
   return (
-    <div className="flex h-full flex-col overflow-y-auto">
-      <div className="grid grid-cols-7 border-b border-[var(--border)] text-center text-xs font-semibold uppercase tracking-wide text-[var(--muted)]">
+    <div className="month-view">
+      <div className="month-weekdays">
         {WEEKDAY_LABELS.map((label) => (
-          <div key={label} className="py-2">
+          <div key={label} className="month-weekday">
             {label}
           </div>
         ))}
       </div>
-      <div className="grid flex-1 grid-cols-7 auto-rows-fr">
+      <div className="month-grid">
         {days.map((day) => {
           const dayEvents = expandedEvents
             .filter((event) => isSameDay(new Date(event.start_time), day))
@@ -45,18 +45,12 @@ export function MonthView({ currentDate, events, onDayClick, onEventClick, onSho
               tabIndex={0}
               onClick={() => onDayClick(day)}
               onKeyDown={(e) => e.key === 'Enter' && onDayClick(day)}
-              className={`flex min-h-[90px] flex-col items-stretch border-b border-r border-[var(--border)] p-1 text-left last:border-r-0 ${
-                inMonth ? 'bg-[var(--surface)]' : 'bg-[var(--bg)] text-[var(--muted)]'
-              }`}
+              className={`month-cell ${inMonth ? '' : 'out-of-month'}`}
             >
-              <span
-                className={`mb-1 inline-flex h-6 w-6 items-center justify-center rounded-full text-xs font-bold ${
-                  isToday(day) ? 'bg-[var(--primary)] text-white' : ''
-                }`}
-              >
+              <span className={`month-cell-daynum ${isToday(day) ? 'is-today' : ''}`}>
                 {format(day, 'd')}
               </span>
-              <div className="flex flex-col gap-0.5 overflow-hidden">
+              <div className="month-cell-events">
                 {dayEvents.slice(0, MAX_VISIBLE_EVENTS).map((event) => {
                   const visual = getEventVisual(event);
                   return (
@@ -67,7 +61,7 @@ export function MonthView({ currentDate, events, onDayClick, onEventClick, onSho
                         onEventClick(event);
                       }}
                       style={visual.style}
-                      className={`truncate rounded px-1 py-0.5 text-[11px] ${visual.className}`}
+                      className={`event-pill ${visual.className}`}
                     >
                       {shouldShowTimePrefix(event) ? `${format(new Date(event.start_time), 'HH:mm')} ` : ''}
                       {event.title}
@@ -81,7 +75,7 @@ export function MonthView({ currentDate, events, onDayClick, onEventClick, onSho
                       e.stopPropagation();
                       onShowMore(day, dayEvents);
                     }}
-                    className="text-left text-[11px] font-semibold text-[var(--muted)] hover:text-[var(--text)] hover:underline"
+                    className="month-show-more"
                   >
                     +{dayEvents.length - MAX_VISIBLE_EVENTS} more
                   </button>

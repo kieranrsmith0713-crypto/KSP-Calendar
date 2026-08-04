@@ -1,46 +1,13 @@
-@import "tailwindcss";
-
 @import "@fontsource/nunito/latin-400.css";
 @import "@fontsource/nunito/latin-600.css";
 @import "@fontsource/nunito/latin-700.css";
 @import "@fontsource/nunito/latin-800.css";
 
-/* KSP suite design tokens — shared with Hub and Money Planner. Dark-only by design. */
+/* Tokens, app-shell, cards, forms, buttons, alerts, badges, and the base
+   list-row pattern come from @kieranrsmith0713-crypto/hub-foundations
+   (imported in main.tsx). Calendar-only extras + layout below. */
 :root {
-  --bg: #12151c;
-  --surface: #1c212b;
-  --surface-2: #242c3a;
   --surface-3: #2c3444;
-  --border: #333b4c;
-  --text: #f5f6f8;
-  --muted: #8b93a5;
-  --primary: #e5484d;
-  --primary-hover: #cc3f44;
-  --positive: #4ade80;
-  --negative: #f87171;
-  --focus: #6366f1;
-  --radius: 14px;
-
-  color-scheme: dark;
-}
-
-* {
-  box-sizing: border-box;
-}
-
-html,
-body,
-#root {
-  margin: 0;
-  height: 100%;
-}
-
-body {
-  background: var(--bg);
-  color: var(--text);
-  font-family: 'Nunito', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  line-height: 1.5;
 }
 
 h1,
@@ -51,216 +18,497 @@ h3 {
 }
 
 ::selection {
-  background: rgba(229, 72, 77, 0.35);
+  background: rgba(79, 138, 139, 0.35);
 }
 
 :focus-visible {
-  outline: 2px solid var(--focus);
+  outline: 2px solid var(--primary);
   outline-offset: 2px;
 }
 
-/* ---------- Shared KSP components ---------- */
-
-.stack {
-  display: flex;
-  flex-direction: column;
-  gap: 1.25rem;
-}
-
-.card {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 1.25rem;
-}
-.card h2 {
-  margin: 0 0 0.85rem;
-  font-size: 1.05rem;
-}
-
-.muted {
-  color: var(--muted);
-}
-.hint {
-  font-size: 0.8rem;
-  margin: 0.6rem 0 0;
-}
-.positive {
-  color: var(--positive);
-}
-.negative {
-  color: var(--negative);
-}
-
-.row {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.6rem;
-}
-
-.field {
-  display: flex;
-  flex-direction: column;
-  gap: 0.35rem;
-  font-size: 0.9rem;
-}
-
-input,
-select,
-textarea {
-  width: 100%;
-  padding: 0.7rem 0.85rem;
-  font-size: 1rem;
-  font-family: inherit;
-  color: var(--text);
-  background: var(--surface-2);
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  outline: none;
-}
-input:focus,
-select:focus,
-textarea:focus {
-  border-color: var(--primary);
-  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.25);
-}
-input[type='color'] {
-  padding: 0.25rem;
-  height: 2.5rem;
-  width: 3rem;
-}
-input[type='checkbox'] {
-  width: auto;
-}
-
-.btn {
-  padding: 0.7rem 1.1rem;
-  font-size: 1rem;
-  font-weight: 600;
-  font-family: inherit;
-  border: 1px solid transparent;
-  border-radius: 10px;
-  cursor: pointer;
-  background: var(--surface-2);
-  color: var(--text);
-  transition:
-    background 0.15s ease,
-    opacity 0.15s ease;
-}
 .btn:hover:not(:disabled) {
   background: var(--surface-3);
-}
-.btn:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-.btn.primary {
-  background: var(--primary);
-  color: white;
-}
-.btn.primary:hover:not(:disabled) {
-  background: var(--primary-hover);
-}
-.btn.small {
-  padding: 0.45rem 0.8rem;
-  font-size: 0.85rem;
-}
-.btn.link {
-  background: none;
-  border: none;
-  color: var(--primary);
-  padding: 0.3rem;
 }
 .btn.link:hover:not(:disabled) {
   background: none;
   text-decoration: underline;
 }
-.btn.danger {
-  background: rgba(248, 113, 113, 0.12);
-  color: var(--negative);
-  border: 1px solid rgba(248, 113, 113, 0.3);
+
+/* ---------- Small reusable text/layout utilities ---------- */
+.text-sm { font-size: 0.875rem; }
+.text-xs { font-size: 0.75rem; }
+.ml-auto { margin-left: auto; }
+.row.align-center { align-items: center; }
+
+/* ---------- Auth splash ---------- */
+.splash-screen {
+  display: flex;
+  height: 100vh;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  background: var(--bg);
 }
-.btn.danger:hover:not(:disabled) {
-  background: rgba(248, 113, 113, 0.22);
+.splash-screen.no-access {
+  padding: 0 1.5rem;
+  text-align: center;
 }
 
-.badge {
-  display: inline-block;
-  margin-left: 0.5rem;
-  padding: 0.1rem 0.5rem;
-  font-size: 0.7rem;
-  font-weight: 600;
-  color: var(--muted);
-  background: var(--surface-2);
-  border-radius: 999px;
-  vertical-align: middle;
-}
-.badge.success {
-  color: var(--positive);
-  background: rgba(74, 222, 128, 0.12);
+/* ---------- Calendar page shell ---------- */
+.calendar-page {
+  display: flex;
+  height: 100vh;
+  flex-direction: column;
+  background: var(--bg);
 }
 
-.alert {
-  margin: 0;
-  padding: 0.65rem 0.8rem;
-  border-radius: 10px;
-  font-size: 0.9rem;
-}
-.alert.error {
-  background: rgba(248, 113, 113, 0.12);
-  color: var(--negative);
-  border: 1px solid rgba(248, 113, 113, 0.3);
-}
-.alert.success {
-  background: rgba(74, 222, 128, 0.12);
-  color: var(--positive);
-  border: 1px solid rgba(74, 222, 128, 0.3);
-}
-.alert.warning {
-  background: rgba(240, 185, 61, 0.12);
-  color: #f0b93d;
-  border: 1px solid rgba(240, 185, 61, 0.3);
+.calendar-alert {
+  margin: 0.5rem;
+  text-align: center;
 }
 
-.stat-dot {
-  width: 0.55rem;
-  height: 0.55rem;
-  border-radius: 999px;
-  flex: 0 0 auto;
-  display: inline-block;
+.calendar-body {
+  flex: 1;
+  overflow: hidden;
 }
 
-/* pill nav / segmented control */
-.nav-link,
-.pill {
-  display: inline-block;
-  padding: 0.45rem 0.85rem;
-  font-size: 0.85rem;
-  font-weight: 600;
-  font-family: inherit;
-  color: var(--muted);
-  text-decoration: none;
-  background: var(--surface-2);
+.calendar-loading {
+  display: flex;
+  height: 100%;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ---------- Calendar header ---------- */
+.calendar-header {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface);
+  padding: 0.75rem;
+}
+@media (min-width: 640px) {
+  .calendar-header {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+}
+
+.calendar-header-left {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.calendar-logo-desktop {
+  display: none;
+}
+@media (min-width: 640px) {
+  .calendar-logo-desktop {
+    display: inline-flex;
+  }
+}
+
+.calendar-nav-arrows {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.nav-arrow-btn {
+  border-radius: 8px;
+  padding: 0.375rem;
+  background: none;
   border: none;
-  border-radius: 999px;
-  white-space: nowrap;
+  color: var(--muted);
   cursor: pointer;
-  transition:
-    background 0.15s ease,
-    color 0.15s ease;
+  font-size: 1rem;
+  line-height: 1;
 }
-.nav-link:hover,
-.pill:hover {
+.nav-arrow-btn:hover {
+  background: var(--surface-2);
   color: var(--text);
 }
-.nav-link.active,
-.pill.active {
-  color: white;
-  background: var(--primary);
+
+.calendar-heading {
+  font-size: 1.125rem;
+  color: var(--text);
 }
 
-/* ---------- KSP wordmark ---------- */
+.calendar-header-right {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
 
+/* ---------- Quick add bar ---------- */
+.quickadd-bar {
+  display: flex;
+  gap: 0.5rem;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface);
+  padding: 0.75rem;
+}
+.quickadd-input {
+  flex: 1 1 auto;
+}
+
+/* ---------- Event pills (shared across month + time-grid views) ---------- */
+.event-pill {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  border-radius: 6px;
+  padding: 0.125rem 0.25rem;
+  font-size: 11px;
+  cursor: pointer;
+}
+
+.event-swatch {
+  border-left: 2px solid;
+  color: var(--text);
+}
+
+/* ---------- Month view ---------- */
+.month-view {
+  display: flex;
+  height: 100%;
+  flex-direction: column;
+  overflow-y: auto;
+}
+
+.month-weekdays {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  border-bottom: 1px solid var(--border);
+  text-align: center;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--muted);
+}
+.month-weekday {
+  padding: 0.5rem 0;
+}
+
+.month-grid {
+  display: grid;
+  flex: 1;
+  grid-template-columns: repeat(7, 1fr);
+  grid-auto-rows: 1fr;
+}
+
+.month-cell {
+  display: flex;
+  min-height: 90px;
+  flex-direction: column;
+  align-items: stretch;
+  border-bottom: 1px solid var(--border);
+  border-right: 1px solid var(--border);
+  padding: 0.25rem;
+  text-align: left;
+  background: var(--surface);
+  cursor: pointer;
+}
+.month-cell:last-child {
+  border-right: none;
+}
+.month-cell.out-of-month {
+  background: var(--bg);
+  color: var(--muted);
+}
+
+.month-cell-daynum {
+  margin-bottom: 0.25rem;
+  display: inline-flex;
+  height: 1.5rem;
+  width: 1.5rem;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+.month-cell-daynum.is-today {
+  background: var(--primary);
+  color: white;
+}
+
+.month-cell-events {
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+  overflow: hidden;
+}
+
+.month-show-more {
+  display: block;
+  width: 100%;
+  text-align: left;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--muted);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  font-family: inherit;
+}
+.month-show-more:hover {
+  color: var(--text);
+  text-decoration: underline;
+}
+
+/* ---------- Time grid (day / week views) ---------- */
+.time-grid {
+  display: flex;
+  height: 100%;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.time-grid-row {
+  display: grid;
+}
+.time-grid-row.bordered {
+  border-bottom: 1px solid var(--border);
+}
+
+.time-grid-daycell-header {
+  border-left: 1px solid var(--border);
+  padding: 0.5rem 0;
+  text-align: center;
+}
+.time-grid-weekday {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.time-grid-daynum {
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.time-grid-allday-label {
+  padding: 0.25rem 0.25rem 0.25rem 0;
+  text-align: right;
+  font-size: 10px;
+  color: var(--muted);
+}
+.time-grid-allday-col {
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+  border-left: 1px solid var(--border);
+  padding: 0.25rem;
+}
+
+.time-grid-body {
+  position: relative;
+  flex: 1;
+  overflow-y: auto;
+}
+
+.time-grid-hour-label {
+  border-bottom: 1px solid var(--border);
+  padding-right: 0.25rem;
+  text-align: right;
+  font-size: 10px;
+  color: var(--muted);
+}
+
+.time-grid-daycol {
+  position: relative;
+  border-left: 1px solid var(--border);
+}
+
+.time-grid-hour-slot {
+  border-bottom: 1px solid var(--border);
+  cursor: pointer;
+}
+
+.time-event {
+  position: absolute;
+  left: 2px;
+  right: 2px;
+  overflow: hidden;
+  border-radius: 6px;
+  padding: 0 0.25rem;
+  font-size: 11px;
+  cursor: pointer;
+}
+
+/* ---------- Modals (event details, day agenda, manage calendars) ---------- */
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.6);
+}
+@media (min-width: 640px) {
+  .modal-backdrop {
+    align-items: center;
+  }
+}
+
+.modal-panel {
+  max-height: 90vh;
+  width: 100%;
+  max-width: 28rem;
+  overflow-y: auto;
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+}
+@media (min-width: 640px) {
+  .modal-panel {
+    border-bottom-left-radius: var(--radius);
+    border-bottom-right-radius: var(--radius);
+  }
+}
+
+.modal-header-row {
+  margin-bottom: 0.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.modal-source-row {
+  margin-bottom: 0.25rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.modal-eyebrow {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--muted);
+}
+
+.modal-title {
+  margin: 0 0 0.75rem;
+  font-size: 1.125rem;
+  color: var(--text);
+}
+.modal-title.no-margin {
+  margin: 0;
+}
+
+.modal-line {
+  margin: 0 0 0.25rem;
+  font-size: 0.9rem;
+}
+
+.modal-description {
+  margin: 0 0 0.75rem;
+  white-space: pre-wrap;
+  font-size: 0.9rem;
+}
+
+.modal-actions {
+  margin-top: 0.75rem;
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+}
+
+.modal-actions-split {
+  margin-top: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.event-color-dot {
+  display: inline-block;
+  width: 0.625rem;
+  height: 0.625rem;
+  border-radius: 999px;
+}
+
+.agenda-event-btn {
+  display: block;
+  width: 100%;
+  border-radius: 6px;
+  padding: 0.375rem 0.5rem;
+  text-align: left;
+  font-size: 0.875rem;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+}
+.agenda-event-time {
+  margin-right: 0.25rem;
+  font-weight: 600;
+}
+
+/* ---------- Manage calendars modal ---------- */
+.calendar-list-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: var(--surface-2);
+  padding: 0.5rem;
+}
+.calendar-swatch {
+  display: inline-block;
+  width: 0.75rem;
+  height: 0.75rem;
+  flex-shrink: 0;
+  border-radius: 999px;
+}
+.calendar-list-item-main {
+  min-width: 0;
+  flex: 1 1 auto;
+}
+.calendar-list-item-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--text);
+}
+.calendar-list-item-error {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 0.75rem;
+  color: var(--negative);
+}
+.calendar-toggle-label {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.add-calendar-form {
+  border-top: 1px solid var(--border);
+  padding-top: 0.75rem;
+}
+.add-calendar-heading {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--text);
+}
+
+/* ---------- KSP wordmark (Calendar's own full-logo treatment, kept local
+   — the package's .ksp-logo-full assumes an <img>, this app draws its own
+   divider/dot ornament instead) ---------- */
 .ksp-logo-compact {
   display: inline-flex;
   align-items: baseline;

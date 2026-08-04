@@ -17,7 +17,7 @@ export function getEventVisual(event: DisplayEvent): { className: string; style:
         ? TODO_PRIORITY_COLORS[event.priority]
         : getCategoryColor(event.category);
   return {
-    className: 'border-l-2 text-[var(--text)]',
+    className: 'event-swatch',
     style: {
       backgroundColor: `${color}26`,
       borderColor: color,

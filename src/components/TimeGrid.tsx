@@ -22,22 +22,22 @@ export function TimeGrid({ days, events, onSlotClick, onEventClick }: TimeGridPr
   const columns = `56px repeat(${days.length}, 1fr)`;
 
   return (
-    <div className="flex h-full flex-col overflow-hidden">
-      <div className="grid border-b border-[var(--border)]" style={{ gridTemplateColumns: columns }}>
+    <div className="time-grid">
+      <div className="time-grid-row bordered" style={{ gridTemplateColumns: columns }}>
         <div />
         {days.map((day) => (
-          <div key={day.toISOString()} className="border-l border-[var(--border)] py-2 text-center">
-            <div className="text-xs uppercase text-[var(--muted)]">{format(day, 'EEE')}</div>
-            <div className="text-sm font-bold text-[var(--text)]">{format(day, 'd')}</div>
+          <div key={day.toISOString()} className="time-grid-daycell-header">
+            <div className="time-grid-weekday">{format(day, 'EEE')}</div>
+            <div className="time-grid-daynum">{format(day, 'd')}</div>
           </div>
         ))}
       </div>
 
       {allDayEvents.length > 0 && (
-        <div className="grid border-b border-[var(--border)]" style={{ gridTemplateColumns: columns }}>
-          <div className="py-1 pr-1 text-right text-[10px] text-[var(--muted)]">All day</div>
+        <div className="time-grid-row bordered" style={{ gridTemplateColumns: columns }}>
+          <div className="time-grid-allday-label">All day</div>
           {days.map((day) => (
-            <div key={day.toISOString()} className="flex flex-col gap-0.5 border-l border-[var(--border)] p-1">
+            <div key={day.toISOString()} className="time-grid-allday-col">
               {allDayEvents
                 .filter((event) => isSameDay(new Date(event.start_time), day))
                 .map((event) => {
@@ -47,7 +47,7 @@ export function TimeGrid({ days, events, onSlotClick, onEventClick }: TimeGridPr
                       key={event.id}
                       onClick={() => onEventClick(event)}
                       style={visual.style}
-                      className={`truncate rounded px-1 py-0.5 text-[11px] ${visual.className}`}
+                      className={`event-pill ${visual.className}`}
                     >
                       {event.title}
                     </span>
@@ -58,26 +58,22 @@ export function TimeGrid({ days, events, onSlotClick, onEventClick }: TimeGridPr
         </div>
       )}
 
-      <div className="relative flex-1 overflow-y-auto">
-        <div className="grid" style={{ gridTemplateColumns: columns }}>
+      <div className="time-grid-body">
+        <div className="time-grid-row" style={{ gridTemplateColumns: columns }}>
           <div>
             {HOURS.map((hour) => (
-              <div
-                key={hour}
-                style={{ height: HOUR_HEIGHT }}
-                className="border-b border-[var(--border)] pr-1 text-right text-[10px] text-[var(--muted)]"
-              >
+              <div key={hour} style={{ height: HOUR_HEIGHT }} className="time-grid-hour-label">
                 {hour === 0 ? '' : format(new Date(2000, 0, 1, hour), 'ha')}
               </div>
             ))}
           </div>
           {days.map((day) => (
-            <div key={day.toISOString()} className="relative border-l border-[var(--border)]">
+            <div key={day.toISOString()} className="time-grid-daycol">
               {HOURS.map((hour) => (
                 <div
                   key={hour}
                   style={{ height: HOUR_HEIGHT }}
-                  className="border-b border-[var(--border)]"
+                  className="time-grid-hour-slot"
                   onClick={() => onSlotClick(new Date(day.getFullYear(), day.getMonth(), day.getDate(), hour))}
                 />
               ))}
@@ -97,7 +93,7 @@ export function TimeGrid({ days, events, onSlotClick, onEventClick }: TimeGridPr
                         onEventClick(event);
                       }}
                       style={{ top, height, ...visual.style }}
-                      className={`absolute left-0.5 right-0.5 overflow-hidden rounded px-1 text-[11px] ${visual.className}`}
+                      className={`time-event ${visual.className}`}
                     >
                       {shouldShowTimePrefix(event) ? `${format(start, 'HH:mm')} ` : ''}
                       {event.title}

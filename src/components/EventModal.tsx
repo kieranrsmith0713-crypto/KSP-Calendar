@@ -48,25 +48,22 @@ function ImportedEventDetails({ event, onClose }: { event: Extract<DisplayEvent,
   const end = new Date(event.end_time);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/60 sm:items-center" onClick={onClose}>
-      <div
-        onClick={(e) => e.stopPropagation()}
-        className="card max-h-[90vh] w-full max-w-md overflow-y-auto rounded-b-none sm:rounded-b-[var(--radius)]"
-      >
-        <div className="mb-1 flex items-center gap-2">
-          <span className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: event.calendarColor }} />
-          <span className="text-xs font-semibold uppercase tracking-wide text-[var(--muted)]">{event.calendarName}</span>
+    <div className="modal-backdrop" onClick={onClose}>
+      <div onClick={(e) => e.stopPropagation()} className="card modal-panel">
+        <div className="modal-source-row">
+          <span className="event-color-dot" style={{ backgroundColor: event.calendarColor }} />
+          <span className="modal-eyebrow">{event.calendarName}</span>
         </div>
-        <h2 className="mb-3 text-lg text-[var(--text)]">{event.title}</h2>
-        <p className="mb-1 text-sm text-[var(--text)]">
+        <h2 className="modal-title">{event.title}</h2>
+        <p className="modal-line">
           {event.all_day
             ? format(start, 'EEEE d MMMM yyyy')
             : `${format(start, 'EEEE d MMMM yyyy, HH:mm')} – ${format(end, 'HH:mm')}`}
         </p>
-        {event.location && <p className="mb-1 text-sm text-[var(--text)]">📍 {event.location}</p>}
-        {event.description && <p className="mb-3 whitespace-pre-wrap text-sm muted">{event.description}</p>}
+        {event.location && <p className="modal-line">📍 {event.location}</p>}
+        {event.description && <p className="modal-description muted">{event.description}</p>}
         <p className="hint muted">Imported — edit this in {event.calendarName} instead.</p>
-        <div className="mt-3 flex justify-end">
+        <div className="modal-actions">
           <button onClick={onClose} className="btn">
             Close
           </button>
@@ -87,27 +84,24 @@ function TodoDetails({ event, onClose }: { event: Extract<DisplayEvent, { source
   const due = new Date(event.start_time);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/60 sm:items-center" onClick={onClose}>
-      <div
-        onClick={(e) => e.stopPropagation()}
-        className="card max-h-[90vh] w-full max-w-md overflow-y-auto rounded-b-none sm:rounded-b-[var(--radius)]"
-      >
-        <span className="text-xs font-semibold uppercase tracking-wide text-[var(--muted)]">
+    <div className="modal-backdrop" onClick={onClose}>
+      <div onClick={(e) => e.stopPropagation()} className="card modal-panel">
+        <span className="modal-eyebrow">
           {event.completed ? 'Completed task' : 'Task'} · KSP To-do
         </span>
         <h2
-          className="mb-3 mt-1 text-lg text-[var(--text)]"
-          style={{ textDecoration: event.completed ? 'line-through' : 'none' }}
+          className="modal-title"
+          style={{ marginTop: '0.25rem', textDecoration: event.completed ? 'line-through' : 'none' }}
         >
           {event.title}
         </h2>
-        <p className="mb-1 text-sm text-[var(--text)]">Due {format(due, 'EEEE d MMMM yyyy, HH:mm')}</p>
-        <p className="mb-1 text-sm text-[var(--text)]">Priority: {PRIORITY_LABELS[event.priority]}</p>
-        {event.category && <p className="mb-1 text-sm text-[var(--text)]">🏷️ {event.category}</p>}
-        {event.recurrence && <p className="mb-1 text-sm muted">Repeats {event.recurrence}</p>}
-        {event.description && <p className="mb-3 whitespace-pre-wrap text-sm muted">{event.description}</p>}
+        <p className="modal-line">Due {format(due, 'EEEE d MMMM yyyy, HH:mm')}</p>
+        <p className="modal-line">Priority: {PRIORITY_LABELS[event.priority]}</p>
+        {event.category && <p className="modal-line">🏷️ {event.category}</p>}
+        {event.recurrence && <p className="modal-line muted">Repeats {event.recurrence}</p>}
+        {event.description && <p className="modal-description muted">{event.description}</p>}
         <p className="hint muted">Manage this task in KSP To-do.</p>
-        <div className="mt-3 flex justify-end gap-2">
+        <div className="modal-actions">
           <a href={TODO_APP_URL} target="_blank" rel="noreferrer" className="btn">
             Open To-do
           </a>
@@ -214,21 +208,17 @@ function InternalEventForm({ event, initialDate, draft, onClose, onSave, onDelet
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/60 sm:items-center" onClick={onClose}>
-      <form
-        onClick={(e) => e.stopPropagation()}
-        onSubmit={handleSubmit}
-        className="card max-h-[90vh] w-full max-w-md overflow-y-auto rounded-b-none sm:rounded-b-[var(--radius)]"
-      >
-        <h2 className="mb-3 text-lg text-[var(--text)]">{isEditing ? 'Edit event' : 'New event'}</h2>
+    <div className="modal-backdrop" onClick={onClose}>
+      <form onClick={(e) => e.stopPropagation()} onSubmit={handleSubmit} className="card modal-panel">
+        <h2 className="modal-title">{isEditing ? 'Edit event' : 'New event'}</h2>
 
-        {!isEditing && draft && <p className="hint muted mb-2">Parsed from quick add — check the details below.</p>}
+        {!isEditing && draft && <p className="hint muted" style={{ marginBottom: '0.5rem' }}>Parsed from quick add — check the details below.</p>}
 
         {event?.recurrence_rule && (
-          <p className="hint muted mb-2">This is a recurring event — changes apply to the whole series.</p>
+          <p className="hint muted" style={{ marginBottom: '0.5rem' }}>This is a recurring event — changes apply to the whole series.</p>
         )}
 
-        {error && <p className="alert error mb-2">{error}</p>}
+        {error && <p className="alert error" style={{ marginBottom: '0.5rem' }}>{error}</p>}
 
         <div className="stack" style={{ gap: '0.75rem' }}>
           <label className="field">
@@ -241,7 +231,7 @@ function InternalEventForm({ event, initialDate, draft, onClose, onSave, onDelet
             <textarea value={description} onChange={(e) => setDescription(e.target.value)} rows={2} />
           </label>
 
-          <label className="row items-center text-sm text-[var(--text)]">
+          <label className="row align-center text-sm">
             <input
               type="checkbox"
               checked={allDay}
@@ -302,7 +292,7 @@ function InternalEventForm({ event, initialDate, draft, onClose, onSave, onDelet
           </div>
         </div>
 
-        <div className="mt-4 flex items-center justify-between">
+        <div className="modal-actions-split">
           <div>
             {isEditing && (
               <button type="button" onClick={handleDelete} disabled={saving} className="btn danger small">
